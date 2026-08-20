@@ -1,0 +1,93 @@
+name: Windows build
+
+# Every tag that starts with "v" (for example v1.0.0) builds the .exe and
+# attaches it to a GitHub Release. Can also be started by hand.
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write          # needed to create the Release
+
+jobs:
+  build:
+    # windows-latest is Windows Server 2022 (the Windows 10 kernel), so the
+    # binary produced here runs on both Windows 10 and Windows 11.
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pyinstaller openpyxl sv-ttk pillow tkinterdnd2
+
+      - name: Generate the icon if it is missing
+        run: |
+          if (-not (Test-Path "icon.ico")) {
+            python database_manager.py --make-icon
+          }
+
+      - name: Tests
+        run: python tests/smoke_test.py
+
+      - name: Build the .exe
+        run: >
+          python -m PyInstaller --noconfirm --clean --onefile --windowed
+          --name "Database Manager"
+          --collect-data sv_ttk
+          --collect-all tkinterdnd2
+          --icon icon.ico
+          --add-data "icon.ico;."
+          database_manager.py
+
+      - name: Check that the .exe starts
+        # The runner may not have an interactive desktop, so instead of
+        # looking for a window title we check that the process survives and
+        # that no crash log was written. A broken bundle exits immediately
+        # and records the traceback.
+        run: |
+          $exe = "dist\Database Manager.exe"
+          if (-not (Test-Path $exe)) { Write-Error "no .exe produced"; exit 1 }
+          $size = (Get-Item $exe).Length
+          Write-Host "size: $([math]::Round($size/1MB,1)) MB"
+          if ($size -lt 10MB) { Write-Error ".exe is suspiciously small"; exit 1 }
+
+          $log = "$env:APPDATA\DatabaseManager\errors.log"
+          if (Test-Path $log) { Remove-Item $log -Force }
+
+          $p = Start-Process $exe -PassThru
+          Start-Sleep -Seconds 25
+          $alive = $null -ne (Get-Process -Id $p.Id -ErrorAction SilentlyContinue)
+          Get-Process -Name "Database Manager" -ErrorAction SilentlyContinue |
+            Stop-Process -Force
+
+          if (Test-Path $log) {
+            Write-Host "CRASH LOG:"; Get-Content $log
+            Write-Error "the application failed on startup"; exit 1
+          }
+          if (-not $alive) { Write-Error "the application exited immediately"; exit 1 }
+          Write-Host "OK - ran for 25 seconds without a problem"
+
+      - name: Upload the build
+        uses: actions/upload-artifact@v4
+        with:
+          name: database-manager-windows
+          path: dist/Database Manager.exe
+          if-no-files-found: error
+
+      - name: Attach to the Release (tags only)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/Database Manager.exe
+          generate_release_notes: true

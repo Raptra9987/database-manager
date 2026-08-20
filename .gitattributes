@@ -1,0 +1,15 @@
+# Line endings are normalised on commit
+* text=auto eol=lf
+
+# Windows .bat files MUST keep CRLF - LF can break them
+*.bat text eol=crlf
+
+# The vCard standard requires CRLF
+*.vcf text eol=crlf
+
+# Binary files - leave them alone
+*.ico binary
+*.xlsx binary
+*.xlsm binary
+*.exe binary
+*.zip binary

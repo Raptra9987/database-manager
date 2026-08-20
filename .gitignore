@@ -1,0 +1,23 @@
+# --- PyInstaller output (published via Releases, not stored in the repo)
+build/
+dist/
+*.spec
+
+# --- Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# --- files the application produces
+*.zip
+*.bak
+*.writing.tmp
+settings.json
+errors.log
+
+# --- editors
+.vscode/
+.idea/
+*.swp
