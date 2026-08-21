@@ -178,6 +178,50 @@ check("each is a single character", all(len(g) == 1 for g in glyphs),
 check("all inside the Segoe icon range",
       all(0xE000 <= ord(g) <= 0xF8FF for g in glyphs))
 
+# ------------------------------------------------------------- missing names
+# Every global a function reaches for must actually exist. A rename that
+# updates the definition but misses a call site shows up here instead of
+# crashing the packaged app on startup.
+print("\n[10] Every referenced global exists")
+import dis
+import builtins
+import types
+
+def globals_used(fn):
+    try:
+        code = fn.__code__
+    except AttributeError:
+        return set()
+    used = {i.argval for i in dis.get_instructions(code)
+            if i.opname in ("LOAD_GLOBAL", "STORE_GLOBAL")}
+    for const in code.co_consts:          # nested functions and lambdas
+        if isinstance(const, types.CodeType):
+            used |= {i.argval for i in dis.get_instructions(const)
+                     if i.opname == "LOAD_GLOBAL"}
+    return used
+
+def ours(obj):
+    """Only what this module defines - imported classes carry their own globals."""
+    return getattr(obj, "__module__", None) == dm.__name__
+
+
+checked, missing = 0, {}
+targets = [v for v in vars(dm).values()
+           if isinstance(v, types.FunctionType) and ours(v)]
+for cls in [v for v in vars(dm).values() if isinstance(v, type) and ours(v)]:
+    targets += [v for v in vars(cls).values()
+                if isinstance(v, (types.FunctionType, staticmethod))]
+targets = [getattr(f, "__func__", f) for f in targets]
+
+for fn in targets:
+    checked += 1
+    for n in globals_used(fn):
+        if not hasattr(dm, n) and not hasattr(builtins, n):
+            missing.setdefault(fn.__qualname__, []).append(n)
+
+check(f"{checked} functions reference only names that exist", not missing,
+      "; ".join(f"{k}: {v}" for k, v in list(missing.items())[:5]))
+
 shutil.rmtree(SANDBOX, ignore_errors=True)
 print("\n" + "=" * 52)
 print(f"PASSED: {len(passed)}    FAILED: {len(failed)}")

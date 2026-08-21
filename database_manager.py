@@ -3513,7 +3513,7 @@ def main():
         pass
 
     root = make_root()
-    ContactApp(root)
+    DatabaseApp(root)
     root.mainloop()
 
 
